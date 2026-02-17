@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/deliguy_restaurant
+    username: root
+    password: root
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8083
