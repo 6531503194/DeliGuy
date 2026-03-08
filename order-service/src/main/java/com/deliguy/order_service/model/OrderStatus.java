@@ -3,9 +3,13 @@ package com.deliguy.order_service.model;
 public enum OrderStatus {
     CREATED,
     PENDING,
-    CONFIRMED,
+    ACCEPTED,
+    REJECTED,
     PREPARING,
+    ASSIGNED,
+    PICKED_UP,
     ON_THE_WAY,
-    DELIVERED,
+    ARRIVED,
+    COMPLETED,
     CANCELLED, 
 }

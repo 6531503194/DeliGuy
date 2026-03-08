@@ -1,21 +1,75 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
-    name: api-service
+    name: api-gateway
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       default-filters:
         - AddRequestHeader=X-GATEWAY-INTERNAL, true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - AddRequestHeader=X-GATEWAY-INTERNAL, true
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+          filters:
+            - AddRequestHeader=X-GATEWAY-INTERNAL, true
+        - id: restaurant-service
+          uri: lb://restaurant-service
+          predicates:
+            - Path=/restaurant/**
+          filters:
+            - AddRequestHeader=X-GATEWAY-INTERNAL, true
+        - id: biker-service
+          uri: lb://biker-service
+          predicates:
+            - Path=/biker/**
+          filters:
+            - AddRequestHeader=X-GATEWAY-INTERNAL, true
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://auth-service:8081
+          issuer-uri: http://${AUTH_HOST:auth-service}:${AUTH_PORT:8081}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:eureka-service}:${EUREKA_PORT:8761}/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.cloud.gateway: DEBUG
+    com.deliguy: DEBUG
+    org.springframework.cloud.netflix.eureka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

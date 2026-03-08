@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.deliguy.restaurent_service.dto.OrderDecisionRequest;
+import com.deliguy.restaurent_service.dto.OrderDetailResponse;
+import com.deliguy.restaurent_service.model.OrderStatus;
 import com.deliguy.restaurent_service.model.RestaurantOrder;
 import com.deliguy.restaurent_service.service.RestaurantOrderService;
 
@@ -27,9 +30,15 @@ public class RestaurantOrderController {
 
     @GetMapping
     public List<RestaurantOrder> myOrders(
-            @RequestHeader("X-RESTAURANT-ID") Long restaurantId
+            @RequestHeader("X-RESTAURANT-ID") String restaurantId,
+            @RequestParam(required = false) OrderStatus status
     ) {
-        return service.getOrders(restaurantId);
+        return service.getOrders(restaurantId, status);
+    }
+
+    @GetMapping("/{orderId}")
+    public OrderDetailResponse getOrder(@PathVariable Long orderId) {
+        return service.getOrderById(orderId);
     }
 
     @PostMapping("/{orderId}/decision")
@@ -37,6 +46,7 @@ public class RestaurantOrderController {
             @PathVariable Long orderId,
             @RequestBody OrderDecisionRequest request
     ) {
-        return service.decideOrder(orderId, request.isAccept());
+        return service.decideOrder(orderId, request.isAccept(), request.getReason());
     }
 }
+

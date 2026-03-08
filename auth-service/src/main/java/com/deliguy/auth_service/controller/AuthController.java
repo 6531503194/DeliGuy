@@ -3,6 +3,7 @@ package com.deliguy.auth_service.controller;
 import com.deliguy.auth_service.dto.AuthResponse;
 import com.deliguy.auth_service.dto.LoginRequest;
 import com.deliguy.auth_service.model.RefreshToken;
+import com.deliguy.auth_service.model.Role;
 import com.deliguy.auth_service.model.User;
 import com.deliguy.auth_service.repository.UserRepository;
 import com.deliguy.auth_service.service.RefreshTokenService;
@@ -16,7 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -28,6 +29,7 @@ public class AuthController {
     @PostMapping("/register")
     public String register(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        System.out.println("Registering user: " + user.getUsername() + " with role: " + user.getRole()  + " and password: " + user.getEmail());
         userRepository.save(user);
         return "User registered";
     }
@@ -35,7 +37,9 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request) {
 
-        User user = userRepository.findByUsername(request.username())
+
+
+        User user = userRepository.findByEmail(request.email())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {

@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +24,11 @@ public class RestaurantOrder {
     @Id
     private Long orderId; // SAME ID from order-service
 
-    private Long restaurantId;
+    private String restaurantId;
+
+    private String customerUsername;
+
+    private String customerPhone;
 
     private String customerAddress;
 
@@ -31,6 +36,11 @@ public class RestaurantOrder {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @Column(columnDefinition = "TEXT")
+    private String orderItemsJson;
+
+    private String rejectionReason; // Internal - for restaurant only
 
     private LocalDateTime createdAt;
 }
