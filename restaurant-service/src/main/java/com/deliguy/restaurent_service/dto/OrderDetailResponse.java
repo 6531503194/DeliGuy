@@ -5,7 +5,7 @@ import java.util.List;
 
 public record OrderDetailResponse(
     Long orderId,
-    String customerUsername,
+    Long customerUserId,
     String customerPhone,
     String customerAddress,
     Double totalAmount,

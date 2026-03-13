@@ -22,17 +22,9 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_HOST:kafka}:${KAFKA_PORT:9092}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_HOST:eureka-service}:${EUREKA_PORT:8761}/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 
 management:
   endpoints:
@@ -42,6 +34,13 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    kafka:
+      enabled: false
 
 resilience4j:
   circuitbreaker:
@@ -60,10 +59,14 @@ resilience4j:
         maxAttempts: 3
         waitDuration: 1s
 
+jwt:
+  secret: my-super-secret-key-for-jwt-authentication-12345
+  expiration-ms: 900000
+
+
 logging:
   level:
     com.deliguy: DEBUG
-    org.springframework.cloud.netflix.eureka: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

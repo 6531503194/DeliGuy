@@ -21,14 +21,18 @@ public class GatewayRequestFilter implements Filter {
     ) throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String uri = httpRequest.getRequestURI();
+        String gatewayHeader = httpRequest.getHeader("X-GATEWAY-INTERNAL");
 
-        // Allow H2 console in dev
-        if (httpRequest.getRequestURI().startsWith("/h2-console")) {
+        System.out.println(">>> URI: " + uri);
+        System.out.println(">>> X-GATEWAY-INTERNAL header: [" + gatewayHeader + "]");
+
+
+        if (httpRequest.getRequestURI().startsWith("/api/auth") || 
+            httpRequest.getRequestURI().startsWith("/actuator")) {
             chain.doFilter(request, response);
             return;
         }
-
-        String gatewayHeader = httpRequest.getHeader("X-GATEWAY-INTERNAL");
 
         if (!"true".equals(gatewayHeader)) {
             HttpServletResponse httpResponse = (HttpServletResponse) response;

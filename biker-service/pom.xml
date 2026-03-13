@@ -31,11 +31,7 @@
 	</dependencyManagement>
 	
 	<dependencies>
-		<!-- Eureka Client -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
+	
 		
 		<!-- Actuator for Health Checks -->
 		<dependency>

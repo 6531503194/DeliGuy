@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline
 
 COPY src ./src
 
-RUN mvn clean package -Dmaven.test.skip=true
+RUN mvn clean install -DskipTests
 
 FROM eclipse-temurin:17-jdk
 

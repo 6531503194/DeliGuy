@@ -37,12 +37,13 @@ public class RestaurantOrderController {
     }
 
     @GetMapping("/{orderId}")
-    public OrderDetailResponse getOrder(@PathVariable Long orderId) {
+    public OrderDetailResponse getOrder(@RequestHeader("X-RESTAURANT-ID") String restaurantId,@PathVariable Long orderId) {
         return service.getOrderById(orderId);
     }
 
     @PostMapping("/{orderId}/decision")
     public RestaurantOrder decide(
+            @RequestHeader("X-RESTAURANT-ID") String restaurantId,
             @PathVariable Long orderId,
             @RequestBody OrderDecisionRequest request
     ) {

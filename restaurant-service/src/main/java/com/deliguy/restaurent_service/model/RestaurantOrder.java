@@ -26,7 +26,7 @@ public class RestaurantOrder {
 
     private String restaurantId;
 
-    private String customerUsername;
+    private Long customerUserId;
 
     private String customerPhone;
 

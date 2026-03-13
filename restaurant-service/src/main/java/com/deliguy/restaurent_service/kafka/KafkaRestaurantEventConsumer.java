@@ -41,7 +41,7 @@ public class KafkaRestaurantEventConsumer {
         RestaurantOrder order = RestaurantOrder.builder()
                 .orderId(event.orderId())
                 .restaurantId(event.restaurantId())
-                .customerUsername(event.customerUsername())
+                .customerUserId(event.customerUserId())
                 .customerPhone(event.customerPhone())
                 .customerAddress(event.deliveryAddress())
                 .totalAmount(event.totalAmount())

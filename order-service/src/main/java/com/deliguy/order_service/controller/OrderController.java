@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.deliguy.order_service.DTO.BikerLocationResponse;
@@ -30,8 +32,13 @@ public class OrderController {
     private final BikerLocationService bikerLocationService;
 
     @PostMapping
-    public Order create(@RequestBody CreateOrderRequest request) {
-        return orderService.createOrder(request);
+    public Order create(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody CreateOrderRequest request) {
+
+        Long userId = Long.valueOf(jwt.getSubject());
+
+        return orderService.createOrder(userId, request);
     }
 
     @GetMapping("/{id}")
@@ -119,7 +126,7 @@ public class OrderController {
     private OrderDetailResponse toDetailResponse(Order order) {
         OrderDetailResponse response = new OrderDetailResponse();
         response.setId(order.getId());
-        response.setCustomerUsername(order.getCustomerUsername());
+        response.setCustomerUserId(order.getCustomerUserId());
         response.setCustomerPhone(order.getCustomerPhone());
         response.setDeliveryAddress(order.getDeliveryAddress());
         response.setRestaurantId(order.getRestaurantId());

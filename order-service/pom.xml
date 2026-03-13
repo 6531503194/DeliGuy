@@ -44,11 +44,7 @@
 	</dependencyManagement>
 	
 	<dependencies>
-		<!-- Eureka Client -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
+	
 		
 		<!-- Actuator for Health Checks -->
 		<dependency>
@@ -60,12 +56,19 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
+			<version>3.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.resilience4j</groupId>
 			<artifactId>resilience4j-spring-boot3</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+
+		 <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

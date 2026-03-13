@@ -7,6 +7,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.deliguy.biker_service.client.RouterClient;
+import com.deliguy.biker_service.dto.RouteResponse;
 import com.deliguy.biker_service.kafka.DeliveryStatusChangedEvent;
 import com.deliguy.biker_service.model.BikerLocation;
 import com.deliguy.biker_service.model.DeliveryAssignment;
@@ -24,6 +26,7 @@ public class DeliveryService {
     private final DeliveryAssignmentRepository repository;
     private final BikerLocationService bikerLocationService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final RouterClient routerClient;
 
     private static final int MAX_REJECTIONS = 3;
     private static final double BASE_DELIVERY_FEE = 2.0;
@@ -52,9 +55,13 @@ public class DeliveryService {
             return null;
         }
 
-        double distanceToRestaurant = calculateDistance(restaurantLat, restaurantLng, 
-            bikerLocationService.getLocation(nearestBikerId).getLatitude(),
-            bikerLocationService.getLocation(nearestBikerId).getLongitude());
+        BikerLocation bikerLocation = bikerLocationService.getLocation(nearestBikerId);
+        double distanceToRestaurant = calculateDistanceWithRouter(
+            bikerLocation.getLatitude(),
+            bikerLocation.getLongitude(),
+            restaurantLat,
+            restaurantLng
+        );
 
         double deliveryFee = calculateDeliveryFee(distanceToRestaurant);
 
@@ -218,10 +225,12 @@ public class DeliveryService {
         DeliveryAssignment saved = repository.save(assignment);
         
         BikerLocation bikerLoc = bikerLocationService.getLocation(bikerId);
-        double distanceToCustomer = calculateDistance(
+        double distanceToCustomer = calculateDistanceWithRouter(
             bikerLoc != null ? bikerLoc.getLatitude() : 0,
             bikerLoc != null ? bikerLoc.getLongitude() : 0,
-            assignment.getCustomerLat(), assignment.getCustomerLng());
+            assignment.getCustomerLat(),
+            assignment.getCustomerLng()
+        );
         
         kafkaTemplate.send("delivery-status-changed", orderId.toString(),
             new DeliveryStatusChangedEvent(orderId, "ON_THE_WAY", bikerId, null, null, 
@@ -306,7 +315,21 @@ public class DeliveryService {
         return BASE_DELIVERY_FEE + (distanceKm * FEE_PER_KM);
     }
 
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    private double calculateDistanceWithRouter(double fromLat, double fromLng, double toLat, double toLng) {
+        try {
+            RouteResponse route = routerClient.calculateRoute(fromLat, fromLng, toLat, toLng);
+            if (route != null && route.distanceKm() != null) {
+                log.info("Using router service: distance = {} km", route.distanceKm());
+                return route.distanceKm();
+            }
+        } catch (Exception e) {
+            log.warn("Router service unavailable, using Haversine fallback: {}", e.getMessage());
+        }
+        
+        return calculateHaversineDistance(fromLat, fromLng, toLat, toLng);
+    }
+
+    private double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
         double earthRadius = 6371;
         
         double dLat = Math.toRadians(lat2 - lat1);

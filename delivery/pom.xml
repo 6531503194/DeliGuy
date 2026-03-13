@@ -64,11 +64,7 @@
             <version>2.5.0</version>
         </dependency>
 
-        <!-- Optional: Eureka for service discovery -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
+
         
         <!-- Actuator for Health Checks -->
         <dependency>

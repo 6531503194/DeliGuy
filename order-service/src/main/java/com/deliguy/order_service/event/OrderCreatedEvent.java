@@ -10,9 +10,11 @@ import java.util.List;
 
 public record OrderCreatedEvent(
     Long orderId,
-    String customerUsername,
+    Long customerUserId,
     String customerPhone,
     String deliveryAddress,
+    Double customerLat,
+    Double customerLng,
     String restaurantId,
     String restaurantName,
     Double totalAmount,

@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class OrderDetailResponse {
     private Long id;
-    private String customerUsername;
+    private Long CustomerUserId;
     private String customerPhone;
     private String deliveryAddress;
     private String restaurantId;

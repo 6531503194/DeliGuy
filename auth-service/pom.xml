@@ -44,11 +44,7 @@
 	</dependencyManagement>
 	
 	<dependencies>
-		<!-- Eureka Client -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
+	
 		
 		<!-- Actuator for Health Checks -->
 		<dependency>
@@ -86,10 +82,33 @@
     </dependency>
 
     <!-- OAuth2 Resource Server (JWT) -->
-    <dependency>
+    <!-- <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-    </dependency>
+    </dependency> -->
+
+	<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+    <version>0.12.3</version>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-impl</artifactId>
+    <version>0.12.3</version>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-jackson</artifactId>
+    <version>0.12.3</version>
+    <scope>runtime</scope>
+</dependency>
+
+	<dependency>
+		<groupId>org.springframework.kafka</groupId>
+		<artifactId>spring-kafka</artifactId>
+	</dependency>
 
 	<dependency>
         <groupId>org.springdoc</groupId>

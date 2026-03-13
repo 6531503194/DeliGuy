@@ -20,16 +20,19 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderEventProducer eventProducer;
 
-    public Order createOrder(CreateOrderRequest request) {
+    public Order createOrder(Long userId,CreateOrderRequest request) {
 
         Order order = buildOrder(request);
+        order.setCustomerUserId(userId);
         Order savedOrder = orderRepository.save(order);
 
         OrderCreatedEvent event = new OrderCreatedEvent(
                 savedOrder.getId(),
-                savedOrder.getCustomerUsername(),
+                savedOrder.getCustomerUserId(),
                 savedOrder.getCustomerPhone(),
                 savedOrder.getDeliveryAddress(),
+                savedOrder.getCustomerLat(),
+                savedOrder.getCustomerLng(),
                 savedOrder.getRestaurantId(),
                 savedOrder.getRestaurantName(),
                 savedOrder.getTotalAmount(),
@@ -51,11 +54,13 @@ public class OrderService {
     private Order buildOrder(CreateOrderRequest request) {
 
     Order order = Order.builder()
-            .customerUsername(request.getCustomerUsername())
+            .customerUserId(request.getCustomerUserId())
             .customerPhone(request.getCustomerPhone())
             .deliveryAddress(request.getDeliveryAddress())
             .restaurantId(request.getRestaurantId())
             .restaurantName(request.getRestaurantName())
+            .customerLat(request.getCustomerLat())
+            .customerLng(request.getCustomerLng())
             .status(OrderStatus.PENDING)
             .createdAt(LocalDateTime.now())
             .build();

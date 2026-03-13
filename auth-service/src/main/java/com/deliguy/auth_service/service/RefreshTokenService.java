@@ -3,6 +3,8 @@ package com.deliguy.auth_service.service;
 import com.deliguy.auth_service.model.RefreshToken;
 import com.deliguy.auth_service.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -46,4 +48,11 @@ public class RefreshTokenService {
 
         return create(oldToken.getUserId());
     }
+
+    @Scheduled(fixedRate = 24 * 60 * 60 * 1000) 
+    public void cleanupExpiredTokens() {
+        repository.deleteByExpiryDateBefore(Instant.now());
+        repository.deleteByRevokedTrue();
+    }
+
 }

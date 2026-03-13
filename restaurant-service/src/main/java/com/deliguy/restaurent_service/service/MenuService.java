@@ -27,6 +27,8 @@ public class MenuService {
         MenuItem item = MenuItem.builder()
                 .restaurantId(restaurantId)
                 .name(request.getName())
+                .description(request.getDescription())
+                .imageUrl(request.getImageUrl())
                 .category(request.getCategory())
                 .price(request.getPrice())
                 .available(true)

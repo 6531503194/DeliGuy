@@ -9,52 +9,35 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
-          lower-case-service-id: true
+          enabled: false
       default-filters:
         - AddRequestHeader=X-GATEWAY-INTERNAL, true
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: http://${AUTH_HOST:auth-service}:${AUTH_PORT:8081}
           predicates:
             - Path=/api/auth/**
-          filters:
-            - AddRequestHeader=X-GATEWAY-INTERNAL, true
         - id: order-service
-          uri: lb://order-service
+          uri: http://${ORDER_HOST:order-service}:${ORDER_PORT:8082}
           predicates:
             - Path=/orders/**
-          filters:
-            - AddRequestHeader=X-GATEWAY-INTERNAL, true
         - id: restaurant-service
-          uri: lb://restaurant-service
+          uri: http://${RESTAURANT_HOST:restaurant-service}:${RESTAURANT_PORT:8084}
           predicates:
             - Path=/restaurant/**
-          filters:
-            - AddRequestHeader=X-GATEWAY-INTERNAL, true
-        - id: biker-service
-          uri: lb://biker-service
-          predicates:
-            - Path=/biker/**
-          filters:
-            - AddRequestHeader=X-GATEWAY-INTERNAL, true
-
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://${AUTH_HOST:auth-service}:${AUTH_PORT:8081}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_HOST:eureka-service}:${EUREKA_PORT:8761}/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
+        # - id: biker-service
+        #   uri: http://${BIKER_HOST:biker-service}:${BIKER_PORT:8085}
+        #   predicates:
+        #     - Path=/biker/**
+        # - id: router-service
+        #   uri: http://${ROUTER_HOST:router-service}:${ROUTER_PORT:8086}
+        #   predicates:
+        #     - Path=/api/route/**
+  # security:
+  #   oauth2:
+  #     resourceserver:
+  #       jwt:
+  #         issuer-uri: http://${AUTH_HOST:auth-service}:${AUTH_PORT:8081}
 
 management:
   endpoints:
@@ -64,12 +47,13 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
 
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     com.deliguy: DEBUG
-    org.springframework.cloud.netflix.eureka: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

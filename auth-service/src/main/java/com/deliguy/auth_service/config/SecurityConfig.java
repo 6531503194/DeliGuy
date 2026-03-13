@@ -15,13 +15,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**", "/swagger-ui/**",
+                .requestMatchers("/api/auth/**", "/actuator/**", "/h2-console/**", "/swagger-ui/**",
                         "/v3/api-docs/**", "swagger-ui.html", "/auth-service/**")
                 .permitAll()
                 .anyRequest().denyAll()
             )
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .httpBasic(Customizer.withDefaults());
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+            // .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

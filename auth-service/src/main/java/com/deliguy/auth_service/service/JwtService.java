@@ -1,33 +1,42 @@
 package com.deliguy.auth_service.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.jwt.*;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class JwtService {
 
-    private final JwtEncoder jwtEncoder;
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration-ms}")
+    private long expirationMs;
+    
+    private SecretKey secretKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generateAccessToken(String userId, List<String> roles) {
 
-        Instant now = Instant.now();
-
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-            .issuer("deliguy-auth")
-            .issuedAt(now)
-            .expiresAt(now.plus(15, ChronoUnit.MINUTES))
+        String token = Jwts.builder()
             .subject(userId)
+            .issuer("deliguy-auth")
             .claim("roles", roles)
-            .build();
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + expirationMs))
+            .signWith(secretKey())
+            .compact();
 
-        return jwtEncoder.encode(
-            JwtEncoderParameters.from(claims)
-        ).getTokenValue();
+        System.out.println(">>> TOKEN GENERATED: " + token); 
+
+        return token;
     }
 }

@@ -13,7 +13,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
     ports:
-      - "3306:3306"
+      - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
@@ -65,35 +65,14 @@ services:
     restart: unless-stopped
 
   # ===============================
-  # Eureka Service Registry
-  # ===============================
-  
-  eureka-service:
-    build: ./eureka-service
-    container_name: deliguy-eureka
-    ports:
-      - "8761:8761"
-    environment:
-      - SPRING_PROFILES_ACTIVE=default
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
-    networks:
-      - deliguy-network
-    restart: unless-stopped
-
-  # ===============================
   # Microservices
   # ===============================
 
   auth-service:
     build: ./auth-service
     container_name: deliguy-auth-service
+    ports:
+      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=default
       - MYSQL_HOST=mysql
@@ -102,13 +81,11 @@ services:
       - MYSQL_USERNAME=root
       - MYSQL_PASSWORD=root
       - KAFKA_HOST=kafka
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
     depends_on:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -120,6 +97,8 @@ services:
   order-service:
     build: ./order-service
     container_name: deliguy-order-service
+    ports:
+      - "8082:8082"
     environment:
       - SPRING_PROFILES_ACTIVE=default
       - MYSQL_HOST=mysql
@@ -129,8 +108,6 @@ services:
       - MYSQL_PASSWORD=root
       - KAFKA_HOST=kafka
       - AUTH_HOST=auth-service
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
     depends_on:
       mysql:
         condition: service_healthy
@@ -139,7 +116,7 @@ services:
       auth-service:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -151,6 +128,8 @@ services:
   restaurant-service:
     build: ./restaurant-service
     container_name: deliguy-restaurant-service
+    ports:
+      - "8084:8084"
     environment:
       - SPRING_PROFILES_ACTIVE=default
       - MYSQL_HOST=mysql
@@ -160,8 +139,6 @@ services:
       - MYSQL_PASSWORD=root
       - KAFKA_HOST=kafka
       - AUTH_HOST=auth-service
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
     depends_on:
       mysql:
         condition: service_healthy
@@ -170,7 +147,7 @@ services:
       auth-service:
         condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8084/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -179,40 +156,138 @@ services:
       - deliguy-network
     restart: unless-stopped
 
-  biker-service:
-    build: ./biker-service
-    container_name: deliguy-biker-service
-    environment:
-      - SPRING_PROFILES_ACTIVE=default
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - DB_NAME=biker_db
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=root
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - KAFKA_HOST=kafka
-      - AUTH_HOST=auth-service
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
-    depends_on:
-      mysql:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      auth-service:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
-    networks:
-      - deliguy-network
-    restart: unless-stopped
+  # biker-service:
+  #   build: ./biker-service
+  #   container_name: deliguy-biker-service
+  #   ports:
+  #     - "8085:8085"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=default
+  #     - MYSQL_HOST=mysql
+  #     - MYSQL_PORT=3306
+  #     - DB_NAME=biker_db
+  #     - MYSQL_USERNAME=root
+  #     - MYSQL_PASSWORD=root
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - KAFKA_HOST=kafka
+  #     - AUTH_HOST=auth-service
+  #     - ROUTER_HOST=router-service
+  #     - ROUTER_PORT=8086
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     auth-service:
+  #       condition: service_started
+  #     router-service:
+  #       condition: service_started
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 40s
+  #   networks:
+  #     - deliguy-network
+  #   restart: unless-stopped
+
+  # ===============================
+  # Router Service
+  # ===============================
+  
+  # router-service:
+  #   build: ./router-service
+  #   container_name: deliguy-router-service
+  #   ports:
+  #     - "8086:8086"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=default
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - ORS_API_KEY=${ORS_API_KEY}
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 40s
+  #   networks:
+  #     - deliguy-network
+  #   restart: unless-stopped
+
+  # ===============================
+  # Admin Service
+  # ===============================
+  
+  # admin-service:
+  #   build: ./admin-service
+  #   container_name: deliguy-admin-service
+  #   ports:
+  #     - "8087:8087"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=default
+  #     - MYSQL_HOST=mysql
+  #     - MYSQL_PORT=3306
+  #     - DB_NAME=admin_db
+  #     - MYSQL_USERNAME=root
+  #     - MYSQL_PASSWORD=root
+  #     - KAFKA_HOST=kafka
+  #     - AUTH_HOST=auth-service
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #     auth-service:
+  #       condition: service_started
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8087/actuator/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 40s
+  #   networks:
+  #     - deliguy-network
+  #   restart: unless-stopped
+
+  # ===============================
+  # Analytics Service
+  # ===============================
+  
+  # analytics-service:
+  #   build: ./analytics-service
+  #   container_name: deliguy-analytics-service
+  #   ports:
+  #     - "8088:8088"
+  #   environment:
+  #     - SPRING_PROFILES_ACTIVE=default
+  #     - MYSQL_HOST=mysql
+  #     - MYSQL_PORT=3306
+  #     - DB_NAME=analytics_db
+  #     - MYSQL_USERNAME=root
+  #     - MYSQL_PASSWORD=root
+  #     - KAFKA_HOST=kafka
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     kafka:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8088/actuator/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 40s
+  #   networks:
+  #     - deliguy-network
+  #   restart: unless-stopped
 
   # ===============================
   # API Gateway
@@ -227,21 +302,35 @@ services:
       - SPRING_PROFILES_ACTIVE=default
       - AUTH_HOST=auth-service
       - AUTH_PORT=8081
-      - EUREKA_HOST=eureka-service
-      - EUREKA_PORT=8761
+      - ORDER_HOST=order-service
+      - ORDER_PORT=8082
+      - RESTAURANT_HOST=restaurant-service
+      - RESTAURANT_PORT=8084
+      - BIKER_HOST=biker-service
+      - BIKER_PORT=8085
+      - ROUTER_HOST=router-service
+      - ROUTER_PORT=8086
+      - ADMIN_HOST=admin-service
+      - ADMIN_PORT=8087
+      - ANALYTICS_HOST=analytics-service
+      - ANALYTICS_PORT=8088
     depends_on:
-      eureka-service:
-        condition: service_healthy
       auth-service:
         condition: service_started
       order-service:
         condition: service_started
       restaurant-service:
         condition: service_started
-      biker-service:
-        condition: service_started
+      # biker-service:
+      #   condition: service_started
+      # router-service:
+      #   condition: service_started
+      # admin-service:
+      #   condition: service_started
+      # analytics-service:
+      #   condition: service_started
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 5

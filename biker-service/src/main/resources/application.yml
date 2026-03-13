@@ -66,16 +66,12 @@ spring:
         jwt:
           jwk-set-uri: http://${AUTH_HOST:auth-service}:${AUTH_PORT:8081}/auth/.well-known/jwks.json
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://${EUREKA_HOST:eureka-service}:${EUREKA_PORT:8761}/eureka/
-    register-with-eureka: true
-    fetch-registry: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 30
-    lease-expiration-duration-in-seconds: 90
+  # ===============================
+  # Router Service
+  # ===============================
+  router:
+    service:
+      base-url: http://${ROUTER_HOST:router-service}:${ROUTER_PORT:8086}
 
 management:
   endpoints:
@@ -85,6 +81,15 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    kafka:
+      enabled: true
+    redis:
+      enabled: true
 
 resilience4j:
   circuitbreaker:
@@ -106,7 +111,6 @@ resilience4j:
 logging:
   level:
     com.deliguy: DEBUG
-    org.springframework.cloud.netflix.eureka: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

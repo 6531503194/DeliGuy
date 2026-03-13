@@ -44,7 +44,7 @@ public class RestaurantOrderService {
 
         return new OrderDetailResponse(
                 order.getOrderId(),
-                order.getCustomerUsername(),
+                order.getCustomerUserId(),
                 order.getCustomerPhone(),
                 order.getCustomerAddress(),
                 order.getTotalAmount(),
